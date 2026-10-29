@@ -1,0 +1,1 @@
+# demo-visual-industrial-inspection
