@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>板卡装配检测</title>
+  <link rel="stylesheet" href="/style.css?v=0.3.1">
+  <script defer src="/vendor/lucide.js"></script>
+  <script defer src="/app.js?v=0.3.1"></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand"><span class="brand-mark"><i data-lucide="scan-line"></i></span><div><strong id="device-name">设备未识别</strong><small id="device-revision">型号未识别</small></div></div>
+    <div class="top-status"><span class="dot"></span><span id="service-state">连接服务中</span></div>
+    <button class="icon-button" id="history-button" title="检测历史" aria-label="检测历史"><i data-lucide="history"></i></button>
+  </header>
+  <main>
+    <section class="heading"><div><div class="eyebrow">ASSEMBLY QUALITY CONTROL</div><h1>正面装配检查<span class="revision">工程验证版</span></h1></div><div class="mode-switch" role="tablist" aria-label="检测模式"><button role="tab" aria-selected="true" data-mode="empty"><i data-lucide="circuit-board"></i>空板检测</button><button role="tab" aria-selected="false" data-mode="wired"><i data-lucide="cable"></i>接线检测</button></div></section>
+    <div id="mode-notice" class="notice" hidden>接线检测尚未开放。此模式不会进行检测或给出装配结论。</div>
+    <section class="summary-strip" aria-label="检测概览">
+      <div class="metric"><span class="metric-icon"><i data-lucide="scan"></i></span><div><small>当前检测状态</small><strong id="verdict">等待检测</strong></div></div>
+      <div class="metric"><span class="metric-icon teal"><i data-lucide="check-check"></i></span><div><small id="match-label">参考一致</small><strong><span id="match-count">—</span><em> / 16 项</em></strong></div></div>
+      <div class="metric"><span class="metric-icon amber"><i data-lucide="triangle-alert"></i></span><div><small id="failure-label">疑似缺失 / 待复核</small><strong><span id="review-count">—</span><em> 项</em></strong></div></div>
+      <div class="metric"><span class="metric-icon"><i data-lucide="timer"></i></span><div><small id="elapsed-label">本次处理时间</small><strong><span id="elapsed">—</span><em> s</em></strong></div></div>
+    </section>
+    <section class="production-strip" id="production-strip" aria-label="批次检测统计" hidden><span>已检 <strong id="production-total">0</strong></span><span>合格 <strong id="production-pass">0</strong></span><span>未通过 <strong id="production-fail">0</strong></span><span>首次通过率 <strong id="production-first-rate">—</strong></span><span>复检后通过率 <strong id="production-rate">—</strong></span><label title="设备离线播报"><input id="audio-enabled" type="checkbox" checked> 语音播报</label><span id="audio-status" role="status"></span><button class="secondary" id="production-export"><i data-lucide="download"></i>导出批次表</button></section>
+    <div class="workspace">
+      <section class="visual-workspace">
+        <div class="section-bar"><h2><i data-lucide="focus"></i>相机</h2><div class="tools"><div id="device-view-modes" class="preview-switch" role="group" aria-label="画面模式" hidden><button data-view="live" aria-pressed="true">实时预览</button><button data-view="inspection" aria-pressed="false">检测帧</button></div><label id="exposure-control" title="默认锁定31.3毫秒曝光；取消后使用自适应曝光" hidden><input type="checkbox" id="fast-exposure" checked> 锁定短曝光</label><label title="显示检查框"><input type="checkbox" id="show-boxes" checked> 检查框</label><button class="icon-button" id="fullscreen-button" title="放大画面" aria-label="放大画面"><i data-lucide="maximize"></i></button></div></div>
+        <div class="viewer" id="viewer">
+          <div class="view-stamp"><span class="dot"></span><span id="source-label">铜柱实拍样本 · 尚未检测</span></div>
+          <div class="image-stage" id="image-stage"><img id="live-preview" alt="设备相机实时画面" hidden><img id="board-image" alt="开发板检测画面"><svg id="overlay" xmlns="http://www.w3.org/2000/svg" aria-label="检查区域"></svg></div>
+          <video id="camera-video" autoplay playsinline muted hidden></video>
+          <div class="scan-progress" id="scan-progress" hidden><span></span><p>正在定位与比对</p></div>
+          <div class="live-error" id="preview-error" role="status" hidden></div>
+          <div class="viewer-bottom"><span id="image-size">FRONT / 正面</span><span id="position-state">等待定位</span></div>
+        </div>
+        <div class="source-toolbar"><div class="source-actions"><button class="secondary" id="upload-button"><i data-lucide="image-up"></i>上传图片</button><button class="secondary" id="camera-button"><i data-lucide="camera"></i><span>开启相机</span></button><button class="icon-button" id="capture-button" title="拍摄当前画面" aria-label="拍摄当前画面" disabled><i data-lucide="aperture"></i></button><button class="icon-button" id="reset-session" title="新一轮检测（换板时重置）" aria-label="新一轮检测" hidden><i data-lucide="rotate-ccw"></i></button></div><button class="primary" id="inspect-button"><i data-lucide="scan-line"></i><span>开始检测</span></button><input id="image-input" type="file" accept="image/jpeg,image/png,image/webp" hidden></div>
+        <div class="sample-strip"><span>参考照片</span><button class="sample-button" data-sample="posts" aria-pressed="true"><img src="/media/posts.jpg" alt=""><span>铜柱实拍样本</span></button><button class="sample-button" data-sample="bare" aria-pressed="false"><img src="/media/bare.jpg" alt=""><span>清晰空板参考</span></button></div>
+        <div id="device-calibration" class="calibration-strip" hidden><label for="calibration-label">工位标定</label><select id="calibration-label"><option value="all">完整板标准 · 全部 16 项</option><option value="pass">选中项 · 通过样本</option><option value="missing">选中项 · 缺失样本</option><option value="damaged">选中项 · 损坏样本</option></select><button class="secondary" id="calibrate-button"><i data-lucide="target"></i>采集标定</button><span id="calibration-state">尚未采集完整标准</span></div>
+        <section class="detail-panel" aria-labelledby="detail-title"><div class="section-bar"><h2 id="detail-title"><i data-lucide="crosshair"></i><span id="detail-name">局部复核</span></h2><span class="badge neutral" id="detail-badge">未选择</span></div><div class="detail-content"><canvas id="detail-canvas" width="440" height="220" aria-label="选中检查区域的局部放大图"></canvas><div class="detail-copy"><span class="eyebrow" id="detail-id">CHECKPOINT</span><div class="tools"><h3 id="detail-heading">等待检测结果</h3><button class="secondary" id="recheck-button" title="仅复检选中模块" disabled hidden><i data-lucide="refresh-cw"></i><span>单模块复检</span></button></div><p id="detail-reason">—</p><p id="detail-score"></p><div class="review-actions"><button class="secondary" id="manual-pass" disabled><i data-lucide="check"></i>人工确认正常</button><button class="secondary" id="manual-fail" disabled><i data-lucide="flag"></i>人工标记异常</button><button class="icon-button" id="manual-reset" title="清除人工结论" aria-label="清除人工结论" disabled><i data-lucide="rotate-ccw"></i></button></div><small id="manual-note">人工复核：尚未记录</small></div></div></section>
+      </section>
+      <aside class="results-panel">
+        <section class="identity" title="M2 型号识别"><div class="section-bar"><h2><i data-lucide="fingerprint"></i>板卡型号识别</h2><span id="ocr-status" class="badge neutral">OCR</span></div><div class="identity-body"><span class="eyebrow">BOARD IDENTIFICATION</span><h3 id="board-version">等待识别型号</h3><p id="version-reason">—</p></div></section>
+        <section class="posts-section"><div class="section-bar"><h2><i data-lucide="component"></i>四铜柱检查</h2><span class="mono" id="post-count">— / 4</span></div><div class="post-grid" id="post-grid"></div></section>
+        <section class="checklist-section"><div class="section-bar"><h2><i data-lucide="list-checks"></i>接口检查</h2><span class="mono">12 项</span></div><div class="filter-row" role="group" aria-label="结果筛选"><button class="active" data-filter="all">全部</button><button data-filter="attention"><span id="attention-label">待复核</span> <span id="attention-count">0</span></button></div><div class="checklist" id="checklist"></div></section>
+        <div class="result-footer"><span id="report-id">尚无检测记录</span><button class="secondary" id="export-button" disabled><i data-lucide="download"></i><span>导出整板表</span></button></div>
+      </aside>
+    </div>
+    <footer class="page-footer"><span><i data-lucide="shield-alert"></i><span id="scope-notice">参考一致 ≠ 功能正常 · 未完成现场精度验收</span></span><span>SIFT / REFERENCE MATCH / OCR</span></footer>
+  </main>
+  <dialog id="history-dialog"><div class="section-bar"><h2>检测历史</h2><button class="icon-button" id="close-history" title="关闭" aria-label="关闭"><i data-lucide="x"></i></button></div><div id="history-list"></div></dialog>
+  <div id="toast" role="status" hidden></div>
+</body>
+</html>

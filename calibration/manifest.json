@@ -1,0 +1,53 @@
+{
+  "method": "operator_authorized_camera_specific_templates",
+  "counts": {
+    "B04": {
+      "pass": 3
+    },
+    "B03": {
+      "pass": 3
+    },
+    "A02": {
+      "pass": 3
+    },
+    "A10": {
+      "pass": 3
+    },
+    "A07": {
+      "pass": 3
+    },
+    "A08": {
+      "pass": 3
+    },
+    "A01": {
+      "pass": 4
+    },
+    "A11": {
+      "pass": 3
+    },
+    "A06": {
+      "pass": 4
+    },
+    "A03": {
+      "pass": 3
+    },
+    "B01": {
+      "pass": 2
+    },
+    "A09": {
+      "pass": 3
+    },
+    "A04": {
+      "pass": 3
+    },
+    "B02": {
+      "pass": 3
+    },
+    "A05": {
+      "pass": 3
+    },
+    "A12": {
+      "pass": 3
+    }
+  }
+}
